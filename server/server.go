@@ -25,13 +25,13 @@ func main() {
 	/* loop for a while apparently */
 	for {
 
-		//  Get values that will fool the boss
-		zipcode := rand.Intn(100000)
-		data0 := rand.Intn(215) - 80
-		data1 := rand.Intn(50) + 10
+		// Get values that will fool the boss
+		stream_id := rand.Intn(100000)
+		Sample0 := rand.Intn(215) - 80
+		Sample1 := rand.Intn(50) + 10
 
 		/*  Send message to all subscribers */
-		msg := fmt.Sprintf("%05d %d %d", zipcode, data0, data1)
+		msg := fmt.Sprintf("%05d %d %d", stream_id, Sample0, Sample1)
 
 		publisher.Send(msg, 0)
 	}
