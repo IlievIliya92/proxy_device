@@ -5,10 +5,6 @@ include(ExternalProject)
 
 file(GLOB_RECURSE SOURCES "src/*.c")
 add_executable(tcp_proxy_service ${SOURCES})
-set_target_properties(tcp_proxy_service PROPERTIES
-    VERSION ${PROJECT_VERSION}
-    SOVERSION 1)
-
 
 include(ExternalProject)
 ExternalProject_Add(tcpServer

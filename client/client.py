@@ -43,7 +43,7 @@ def client_thread(name, ipv4, port):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((ipv4, port))
 
-        stream_id = str(random.randint(10,10000))
+        stream_id = str(random.randint(1, 10000))
         printout('__client_%s__ Sending request for %s ...' % (name, stream_id), YELLOW)
         s.sendall(stream_id.encode('utf-8'))
         data = s.recv(1024)
