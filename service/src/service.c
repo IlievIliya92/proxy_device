@@ -1,46 +1,106 @@
 /******************************** INCLUDE FILES *******************************/
+#include <unistd.h>
+#include <assert.h>
+
 #include "zhelpers.h"
 
+#include "service.h"
 
 /******************************** LOCAL DEFINES *******************************/
-#define BE_SOCKET_PATH "ipc:///tmp/be.sock"
-#define STREAM_ID      "10001"
+#define MAX_SOCKET_PATH_SIZE 255
+#define MTU 9000
 
-/************************************* MAIN ***********************************/
-int main (int argc, char *argv [])
+/*********************************** TYPEDEFS *********************************/
+//  Structure of our class
+
+struct _service_t {
+    void *context;
+    char socket_path[MAX_SOCKET_PATH_SIZE];
+};
+
+/****************************** LOCAL FUNCTIONS *******************************/
+
+
+/*********************************** METHODS **********************************/
+
+//  --------------------------------------------------------------------------
+// Constructor
+
+service_t *
+service_new (const char *socket_path)
 {
-    int stream_id = 0;
-    int data0 = 0;
-    int data1 = 0;
-
-    void *context = NULL;
-    void *subscriber = NULL;
     int rc = -1;
 
-    //  Socket to talk to server
-    printf ("Collecting updates from weather server...\n");
-    context = zmq_ctx_new ();
-    subscriber = zmq_socket (context, ZMQ_SUB);
-    rc = zmq_connect (subscriber, BE_SOCKET_PATH);
-    assert (rc == 0);
+    service_t *self = (service_t *) malloc (sizeof (service_t));
+    assert (self);
 
-    //  Subscribe to stream_id
-    const char *stream_filter = STREAM_ID;
-    rc = zmq_setsockopt (subscriber, ZMQ_SUBSCRIBE,
-                         stream_filter, strlen (stream_filter));
-    assert (rc == 0);
+    self->context = zmq_ctx_new();
+    strcpy(self->socket_path, socket_path);
 
-    //  Process update
-    char *string = s_recv (subscriber);
-
-    sscanf (string, "%d %d %d", &stream_id, &data0, &data1);
-    free (string);
-
-    printf ("stream_id '%s', Data0 %d, Data1 %d\n",
-             stream_filter, data0, data1);
-
-    zmq_close (subscriber);
-    zmq_ctx_destroy (context);
-
-    return 0;
+    return self;
 }
+
+
+//  --------------------------------------------------------------------------
+// Destructor
+
+void
+service_destroy(service_t **self_p)
+{
+    assert (self_p);
+
+    if (*self_p) {
+        service_t *self = *self_p;
+
+        zmq_ctx_destroy (self->context);
+        //  Free object itself
+        free (self);
+        *self_p = NULL;
+    }
+}
+
+void service_connection_cb(int conn, void *args)
+{
+    int rc = -1;
+    int bytes = 0;
+    void *subscriber = NULL;
+    service_t *_service_ctx = NULL;
+
+    char rx_buff[MTU];
+    char tx_buff[MTU];
+
+    _service_ctx = (service_t *)args;
+
+    bytes = read(conn, rx_buff, MTU);
+    if (bytes > 0)
+    {
+        /*
+         * We are currently passing just the stream ID
+         * A simple application protocol should be
+         * implemented.
+         */
+        fprintf(stdout, "Stream ID: %s\n", rx_buff);
+
+        subscriber = zmq_socket (_service_ctx->context, ZMQ_SUB);
+        rc = zmq_connect (subscriber, _service_ctx->socket_path);
+        if (rc != 0)
+        {
+            fprintf(stderr, "Connect to %s failed (%s)", _service_ctx->socket_path,
+                                                         zmq_strerror(zmq_errno()));
+            return;
+        }
+
+        rc = zmq_setsockopt (subscriber, ZMQ_SUBSCRIBE,
+                             rx_buff, strlen (rx_buff));
+        if (rc != 0)
+        {
+            fprintf(stdout, "setsockopt failed");
+            return;
+        }
+        bytes = zmq_recv(subscriber, tx_buff, MTU - 1, 0);
+        zmq_close(subscriber);
+
+        write(conn, tx_buff, bytes);
+    }
+}
+

@@ -17,8 +17,17 @@ ExternalProject_Add(tcpServer
 	INSTALL_COMMAND cmake -E echo "Skipping install step."
 )
 
+
 target_include_directories(tcp_proxy_service PRIVATE src/)
+target_include_directories(tcp_proxy_service PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/tcpServer-prefix/src/tcpServer/include/)
+target_include_directories(tcp_proxy_service PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/tcpServer-prefix/src/tcpServer/libs/log/include/)
+target_include_directories(tcp_proxy_service PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/tcpServer-prefix/src/tcpServer/libs/utils/include/)
+
 target_link_libraries(tcp_proxy_service zmq czmq)
+
 target_link_libraries(tcp_proxy_service ${CMAKE_CURRENT_BINARY_DIR}/tcpServer-prefix/src/tcpServer-build/libtcp_server.so)
+target_link_libraries(tcp_proxy_service ${CMAKE_CURRENT_BINARY_DIR}/tcpServer-prefix/src/tcpServer-build/libs/log/liblog.so)
+target_link_libraries(tcp_proxy_service ${CMAKE_CURRENT_BINARY_DIR}/tcpServer-prefix/src/tcpServer-build/libs/utils/libutils.so)
+
 
 add_dependencies(tcp_proxy_service tcpServer)
