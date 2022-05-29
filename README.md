@@ -44,9 +44,9 @@ $ python3
 
 ## What is what
 
--- ``client`` -- Just a test client sending some requests to our service.
--- ``service`` -- TCP Proxy service. Bridge connection between TCP and proxy.
-                  Redirects connections to proxy's public endpoint for subscribers (back end).
--- ``proxy`` -- Proxy connecting front end (subscribers) and back end (publisher)
--- ``server`` -- Constanty produces random data (samples) and sends
+* ``client`` -- Just a test client sending some requests to our service.
+* ``service`` -- TCP Proxy service. Bridge connection between TCP and proxy.
+Redirects connections to proxy's public endpoint for subscribers (back end).
+* ``proxy`` -- Proxy connecting front end (subscribers) and back end (publisher)
+* ``server`` -- Constanty produces random data (samples) and sends
                  (publishes) them via PUB socket.
