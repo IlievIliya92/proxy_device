@@ -11,3 +11,4 @@ add_subdirectory(service)
 # --- GO server / proxy
 GO_GET(zmq github.com/pebbe/zmq4)
 add_subdirectory(proxy)
+add_subdirectory(server)
