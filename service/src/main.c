@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
         LOG_MSG(ERR, "Failed to initialize TCP server");
         return -1;
     }
-    tcp_server_dispatch(tcp_server, service_connection_cb, (void *)service);
+    tcp_server_dispatch(tcp_server, service_conn_cb(service), (void *)service);
 
     /* Server loop */
     tcp_server_run(tcp_server);

@@ -13,53 +13,20 @@
 /*********************************** TYPEDEFS *********************************/
 //  Structure of our class
 
+
 struct _service_t {
     void *context;
     char socket_path[MAX_SOCKET_PATH_SIZE];
+
+    /* Connection callback */
+    service_conn_cb_t conn_cb;
 };
 
 /****************************** LOCAL FUNCTIONS *******************************/
 
 
 /*********************************** METHODS **********************************/
-
-//  --------------------------------------------------------------------------
-// Constructor
-
-service_t *
-service_new (const char *socket_path)
-{
-    int rc = -1;
-
-    service_t *self = (service_t *) malloc (sizeof (service_t));
-    assert (self);
-
-    self->context = zmq_ctx_new();
-    strcpy(self->socket_path, socket_path);
-
-    return self;
-}
-
-
-//  --------------------------------------------------------------------------
-// Destructor
-
-void
-service_destroy(service_t **self_p)
-{
-    assert (self_p);
-
-    if (*self_p) {
-        service_t *self = *self_p;
-
-        zmq_ctx_destroy (self->context);
-        //  Free object itself
-        free (self);
-        *self_p = NULL;
-    }
-}
-
-void service_connection_cb(int conn, void *args)
+static void service_connection_cb(int conn, void *args)
 {
     int rc = -1;
     int bytes = 0;
@@ -104,3 +71,48 @@ void service_connection_cb(int conn, void *args)
     }
 }
 
+
+//  --------------------------------------------------------------------------
+// Constructor
+
+service_t *
+service_new (const char *socket_path)
+{
+    int rc = -1;
+
+    service_t *self = (service_t *) malloc (sizeof (service_t));
+    assert (self);
+
+    self->context = zmq_ctx_new();
+    strcpy(self->socket_path, socket_path);
+
+    self->conn_cb = service_connection_cb;
+
+    return self;
+}
+
+
+//  --------------------------------------------------------------------------
+// Destructor
+
+void
+service_destroy(service_t **self_p)
+{
+    assert (self_p);
+
+    if (*self_p) {
+        service_t *self = *self_p;
+
+        zmq_ctx_destroy (self->context);
+        //  Free object itself
+        free (self);
+        *self_p = NULL;
+    }
+}
+
+//  --------------------------------------------------------------------------
+// Connection Callback
+service_conn_cb_t service_conn_cb(service_t *self)
+{
+    return self->conn_cb;
+}
