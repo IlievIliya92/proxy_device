@@ -44,12 +44,10 @@ def client_thread(name, ipv4, port):
         s.connect((ipv4, port))
 
         stream_id = str(random.randint(1, 10000))
-        printout('__client_%s__ Sending request for %s ...' % (name, stream_id), YELLOW)
+        printout(f'__client_{name}__ Sending request for {stream_id} ...', YELLOW)
         s.sendall(stream_id.encode('utf-8'))
         data = s.recv(1024)
-
-        printout('__client_%s__ Received:' % name, YELLOW)
-        printout(repr(data), YELLOW)
+        printout(f'__client_{name}__ Received: {data.decode()}', YELLOW)
         s.close()
     except Exception as e:
         printout(str(e), RED)
