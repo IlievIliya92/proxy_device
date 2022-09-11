@@ -59,7 +59,7 @@ func main() {
     rand.Seed(time.Now().UnixNano())
 
     wg.Add(n_threads)
-    for i := 1; i <= n_threads; i++ {
+    for i := 0; i < n_threads; i++ {
         fmt.Printf("Starting client thread: %d\n", i)
         go client_routine(i, server_endpoint)
     }
